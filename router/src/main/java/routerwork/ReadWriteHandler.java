@@ -13,62 +13,62 @@ public class ReadWriteHandler implements CompletionHandler<Integer, Attachment> 
       SOH = "" + (char)1;
     }
     @Override
-    public void completed(Integer result, Attachment attach) {
+    public void completed(Integer result, Attachment attachment) {
         
       if (result == -1) {
         try {
-          attach.client.close();
-          Router.removeClient(attach.clientId);
-          String port = attach.server.getLocalAddress().toString().split(":")[1];
+          attachment.client.close();
+          Router.removeClient(attachment.clientId);
+          String port = attachment.server.getLocalAddress().toString().split(":")[1];
           System.out.format("[" + getServerName(port) + "]Stopped   listening to the   client %s%n",
-              attach.clientAddr);
+              attachment.clientAddr);
         } catch (IOException ex) {
           ex.printStackTrace();
         }
         return;
       }
   
-      if (attach.isRead) {
-        attach.buffer.flip();
-        int limits = attach.buffer.limit();
+      if (attachment.isRead) {
+        attachment.buffer.flip();
+        int limits = attachment.buffer.limit();
         byte bytes[] = new byte[limits];
-        attach.buffer.get(bytes, 0, limits);
-        Charset cs = Charset.forName("UTF-8");
-        String msg = new String(bytes, cs);
-        String datum[] = msg.split(SOH);
-        attach.msg = datum;
+        attachment.buffer.get(bytes, 0, limits);
+        Charset charset = Charset.forName("UTF-8");
+        String message = new String(bytes, charset);
+        String datum[] = message.split(SOH);
+        attachment.message = datum;
         try
         {
-            String port = attach.server.getLocalAddress().toString().split(":")[1];
-            System.out.format("["+ getServerName(port) +"]Client %s  says: %s%n", attach.clientAddr,
-            msg.replace((char)1, '|'));
+            String port = attachment.server.getLocalAddress().toString().split(":")[1];
+            System.out.format("["+ getServerName(port) +"]Client %s  says: %s%n", attachment.clientAddr,
+            message.replace((char)1, '|'));
         }
         catch(Exception e)
         {
             System.out.println(e);
         }
-        attach.isRead = false; // It is a write
-        attach.buffer.rewind();
-        attach.buffer.clear();
-        byte[] data = msg.getBytes(cs);
-        attach.buffer.put(data);
-        attach.buffer.flip();
-        if (attach.client.isOpen() && Router.getSize() > 1)
+        attachment.isRead = false; //write
+        attachment.buffer.rewind();
+        attachment.buffer.clear();
+        byte[] data = message.getBytes(charset);
+        attachment.buffer.put(data);
+        attachment.buffer.flip();
+        if (attachment.client.isOpen() && Router.getSize() > 1)
         {
-            new CheckSum().performAction(attach, IResponsibility.CHECKSUM);
+            new CheckSum().performAction(attachment, IResponsibility.CHECKSUM);
         }
 
   
       } else {
-        // Write to the client
-        attach.isRead = true;
-        attach.buffer.clear();
-        attach.client.read(attach.buffer, attach, this);
+        // Write to client
+        attachment.isRead = true;
+        attachment.buffer.clear();
+        attachment.client.read(attachment.buffer, attachment, this);
 
       }
     }
     @Override
-    public void failed(Throwable e, Attachment attach) {
+    public void failed(Throwable e, Attachment attachment) {
       e.printStackTrace();
     }
     private String getServerName(String port)

@@ -7,15 +7,15 @@ import java.nio.channels.AsynchronousSocketChannel;
 import java.util.concurrent.Future;
 
 public class Broker {
-    private static int qty = 100;
+    private static int quantity = 100;
     private static int cash = 1000;
-    private static Attachment attach;
+    private static Attachment attachment;
     private static final String fixv = "8=FIX.4.2";
     public static int bs;
-    public static int dstId;
+    public static int destinationId;
 
     public Broker(int id, int by) {
-        dstId = id;
+        destinationId = id;
         bs = by;
     }
 
@@ -26,46 +26,45 @@ public class Broker {
         Future<Void> result = channel.connect(serverAddr);
         result.get();
         System.out.println("Broker is now connected!");
-        attach = new Attachment();
-        attach.client = channel;
-        attach.buffer = ByteBuffer.allocate(2048);
-        attach.isRead = true;
+        attachment = new Attachment();
+        attachment.client = channel;
+        attachment.buffer = ByteBuffer.allocate(2048);
+        attachment.isRead = true;
         
-        attach.mainThread = Thread.currentThread();
+        attachment.mainThread = Thread.currentThread();
 
         ReadWriteHandler readWriteHandler = new ReadWriteHandler();
-        channel.read(attach.buffer, attach, readWriteHandler);
+        channel.read(attachment.buffer, attachment, readWriteHandler);
         try {
             Thread.currentThread().join();
         }
         catch (InterruptedException e) {
-          //  e.printStackTrace();
         }
     }
-    public static String sellProduct(int dst) {
+    public static String sellProduct(int destination) {
         String soh = "" + (char)1;
         // From 
         // To
-        String msg = " Selling Accepted: id="+attach.clientId+soh+fixv+soh+"35=D"+soh+"49=CLIENT"+soh+"56=SERVER"+soh+"11=ID"+soh+"55=USD/ZAR"+soh;
-        msg += "49="+attach.clientId+soh;
+        String message = " Selling Accepted: id="+attachment.clientId+soh+fixv+soh+"35=D"+soh+"49=CLIENT"+soh+"56=SERVER"+soh+"11=ID"+soh+"55=USD/ZAR"+soh;
+        message += "49="+attachment.clientId+soh;
 
-        String errMsg = "Buying Rejected, Insuffient funds!";
-        if (qty > 0)
-            return msg;
+        String errorMessage = "Buying Rejected, Insuffient funds!";
+        if (quantity > 0)
+            return message;
         else
-            return errMsg;
+            return errorMessage;
     }
 
-    public static String buyProduct(int dst) {
+    public static String buyProduct(int destination) {
         String soh = "" + (char)1;
-        String msg = " Selling Accepted: id="+attach.clientId+soh+fixv+soh+"35=D"+soh+"49=CLIENT"+soh+"56=SERVER"+soh+"11=ID"+soh+"55=USD/ZAR"+soh;
-        msg += "49="+attach.clientId+soh;
+        String message = " Selling Accepted: id="+attachment.clientId+soh+fixv+soh+"35=D"+soh+"49=CLIENT"+soh+"56=SERVER"+soh+"11=ID"+soh+"55=USD/ZAR"+soh;
+        message += "49="+attachment.clientId+soh;
 
-        String errMsg = "Buying Rejected, Insuffient funds!";
+        String errorMessage = "Buying Rejected, Insuffient funds!";
         if (cash > 0)
-            return msg;
+            return message;
         else
-            return errMsg;
+            return errorMessage;
     }
 
     public static boolean proccessReply(String reply) {
@@ -73,20 +72,20 @@ public class Broker {
         String tag = "";
         String state = "";
 
-        for (String dat : data) {
-            if (dat.contains("35="))
-                tag = dat.split("=")[1];
-            if (dat.contains("49="))
-                state = dat.split("=")[1];
+        for (String data_ : data) {
+            if (data_.contains("35="))
+                tag = data_.split("=")[1];
+            if (data_.contains("49="))
+                state = data_.split("=")[1];
         }
 
         if (tag.equals("8") && state.equals("8")) {
-            System.out.println("\nMarket[" + dstId +"] Order Rejected!\n");
+            System.out.println("\nMarket[" + destinationId +"] Order Rejected!\n");
             return false;
         }
 
         if (tag.equals("8") && state.equals("2")) {
-            System.out.println("\nMarket[" + dstId +"] Order Accepted!\n");
+            System.out.println("\nMarket[" + destinationId +"] Order Accepted!\n");
             return true;
         }
         return false;
@@ -94,10 +93,10 @@ public class Broker {
 
     public static void updateData(boolean state) {
         if (state == false) {
-            qty -= 2;
+            quantity -= 2;
             cash += 55;
         } else {
-            qty += 2;
+            quantity += 2;
             cash -= 90;
         }   
     }

@@ -4,11 +4,11 @@ public class EchoBack implements IResponsibility
 {
     private int ECHOBACK = IResponsibility.ECHOBACK;
     @Override
-    public void performAction(Attachment attach, int resp)
+    public void performAction(Attachment attachment, int response)
     {
-        if (resp != ECHOBACK)
+        if (response != ECHOBACK)
             return ;
-        attach.isRead = false;
-        attach.client.write(attach.buffer, attach, attach.rwHandler);
+        attachment.isRead = false;
+        attachment.client.write(attachment.buffer, attachment, attachment.rwHandler);
     }
 }

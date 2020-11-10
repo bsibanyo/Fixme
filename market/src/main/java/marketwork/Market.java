@@ -9,23 +9,23 @@ import java.util.Random;
 import java.util.concurrent.Future;
 public class Market
 {
-    private static int qty;
+    private static int quantity;
     private static int price;
-    private static int req;
-    private static int dstId;
+    private static int request;
+    private static int destinationId;
     private static final String fixv = "8=FIX.4.2";
-    private static Attachment attach;
+    private static Attachment attachment;
 
-    public Market(int _qty, int _pr)
+    public Market(int quantity_, int price_)
     {
-        qty = _qty;
-        price = _pr;
+        quantity = quantity_;
+        price = price_;
         try {
             Random rand = new Random();
-            req = rand.nextInt(3) + 1;
+            request = rand.nextInt(3) + 1;
         }
         catch(Exception e) {
-            req = 2;
+            request = 2;
         }
     }
 
@@ -35,89 +35,89 @@ public class Market
         Future<Void> result = channel.connect(serverAddr);
         result.get();
         System.out.println("Market is now connected!");
-        attach = new Attachment();
-        attach.client = channel;
-        attach.buffer = ByteBuffer.allocate(2048);
-        attach.isRead = true;
-        attach.mainThread = Thread.currentThread();
+        attachment = new Attachment();
+        attachment.client = channel;
+        attachment.buffer = ByteBuffer.allocate(2048);
+        attachment.isRead = true;
+        attachment.mainThread = Thread.currentThread();
 
 
         ReadWriteHandler readWriteHandler = new ReadWriteHandler();
-        channel.read(attach.buffer, attach, readWriteHandler);
+        channel.read(attachment.buffer, attachment, readWriteHandler);
         try {
             Thread.currentThread().join();
         } catch(Exception e) {
             
         }
     }
-    public static String processRequest(String res)
+    public static String processRequest(String response)
     {
-        String data[] = res.split("" + (char)1);
-        String msgType="";
-        String reqType="";
+        String data[] = response.split("" + (char)1);
+        String messageType="";
+        String requestType="";
         String price="";
-        String quant="";
-        for(String dat : data)
+        String _quantity="";
+        for(String data_ : data)
         {
-            if (dat.contains("35="))
-                msgType = dat.split("=")[1];
-            else if (dat.contains("49="))
-                reqType = dat.split("=")[1];
-            else if (dat.contains("56="))
-                price = dat.split("=")[1];
-            else if (dat.contains("11="))
-                quant = dat.split("=")[1];
-            else if (dat.contains("id="))
-                dstId = Integer.parseInt(dat.split("=")[1]);
+            if (data_.contains("35="))
+                messageType = data_.split("=")[1];
+            else if (data_.contains("49="))
+                requestType = data_.split("=")[1];
+            else if (data_.contains("56="))
+                price = data_.split("=")[1];
+            else if (data_.contains("11="))
+                _quantity = data_.split("=")[1];
+            else if (data_.contains("id="))
+                destinationId = Integer.parseInt(data_.split("=")[1]);
         }
         
-        return process(msgType, reqType, price, quant);
+        return process(messageType, requestType, price, _quantity);
     }
-    private static String process(String msgType, String reqType, String pric, String quant)
+    private static String process(String messageType, String requestType, String _price, String _quantity)
     {
-        int p = Integer.parseInt(pric);
-        int q = Integer.parseInt(quant);
+        int p = Integer.parseInt(_price);
+        int q = Integer.parseInt(_quantity);
         // /BROKER
-        if (msgType.equals("D") && reqType.equals("2") && p < price && (req == 2 || req == 3))
-            return getMessage(3, Integer.parseInt(quant)); //BUY 
-        else if (msgType.equals("D") && reqType.equals("1") && p >= price && qty - q >= 0 && (req == 2 || req == 3))
-            return getMessage(2, Integer.parseInt(quant)); //SELL
+        if (messageType.equals("D") && requestType.equals("2") && p < price && (request == 2 || request == 3))
+            return getMessage(3, Integer.parseInt(_quantity)); //BUY 
+        else if (messageType.equals("D") && requestType.equals("1") && p >= price && quantity - q >= 0 && (request == 2 || request == 3))
+            return getMessage(2, Integer.parseInt(_quantity)); //SELL
         else
-            return getMessage(1, Integer.parseInt(quant)); //REJECT
+            return getMessage(1, Integer.parseInt(_quantity)); //REJECT
     }
-    private static String getMessage(int code, int quant)
+    private static String getMessage(int code, int _quantity)
     {
         String soh = "" + (char)1;
-        String msg = "";
+        String message = "";
         if (code == 1)
-            msg = "id="+attach.clientId+soh+fixv+soh+"35=D"+soh+"49=CLIENT"+soh+"56=SERVER"+soh+"11=ID"+soh+"55=USD/ZAR"+soh;
+            message = "id="+attachment.clientId+soh+fixv+soh+"35=D"+soh+"49=CLIENT"+soh+"56=SERVER"+soh+"11=ID"+soh+"55=USD/ZAR"+soh;
         if (code == 2)
         {
-            msg = "id="+attach.clientId+soh+fixv+soh+"35=D"+soh+"49=CLIENT"+soh+"56=SERVER"+soh+"11=ID"+soh+"55=USD/ZAR"+soh;
-            qty -= quant;
+            message = "id="+attachment.clientId+soh+fixv+soh+"35=D"+soh+"49=CLIENT"+soh+"56=SERVER"+soh+"11=ID"+soh+"55=USD/ZAR"+soh;
+            quantity -= _quantity;
         }
         if (code == 3)
         {
-            msg = "id="+attach.clientId+soh+fixv+soh+"35=D"+soh+"49=CLIENT"+soh+"56=SERVER"+soh+"11=ID"+soh+"55=USD/ZAR"+soh;
-            qty += quant;
+            message = "id="+attachment.clientId+soh+fixv+soh+"35=D"+soh+"49=CLIENT"+soh+"56=SERVER"+soh+"11=ID"+soh+"55=USD/ZAR"+soh;
+            quantity += _quantity;
         }
-        return msg + getCheckSum(msg);
+        return message + getCheckSum(message);
     }
-    private static String getCheckSum(String msg)
+    private static String getCheckSum(String message)
     {
-        int j = 0;
-        char t[];
+        int a = 0;
+        char c[];
         String soh = "" + (char)1;
-        String datum[] = msg.split(soh);
-        for(int k = 0; k < datum.length; k++)
+        String datum[] = message.split(soh);
+        for(int b = 0; b < datum.length; b++)
         {
-          t = datum[k].toCharArray();
-          for(int i = 0; i < t.length; i++)
+          c = datum[b].toCharArray();
+          for(int d = 0; d < c.length; d++)
           {
-            j += (int)t[i];
+            a += (int)c[d];
           }
-          j += 1;
+          a += 1;
         }
-        return ("10="+ (j % 256) + soh);
+        return ("10="+ (a % 256) + soh);
     }
 }

@@ -10,7 +10,7 @@ public class Attachment {
     public int clientId;
     public ByteBuffer buffer;
     public SocketAddress clientAddr;
-    public String msg[];
+    public String message[];
     public ReadWriteHandler rwHandler;
     public boolean isRead;
 }

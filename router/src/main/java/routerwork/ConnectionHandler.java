@@ -10,33 +10,33 @@ import java.nio.charset.*;
 public class ConnectionHandler implements CompletionHandler<AsynchronousSocketChannel, Attachment> {
       private static int clientId = 777;
   @Override
-  public void completed(AsynchronousSocketChannel client, Attachment attach) {
+  public void completed(AsynchronousSocketChannel client, Attachment attachment) {
     try {
       SocketAddress clientAddr = client.getRemoteAddress();
       System.out.format("Connection accepted %s%n", clientAddr);
-      attach.server.accept(attach, this);
+      attachment.server.accept(attachment, this);
       ReadWriteHandler rwHandler = new ReadWriteHandler();
-      Attachment newAttach = new Attachment();
-      newAttach.server = attach.server;
-      newAttach.client = client;
-      newAttach.clientId = clientId++;
-      newAttach.buffer = ByteBuffer.allocate(2048);
-      newAttach.isRead = false;
-      newAttach.clientAddr = clientAddr;
-      Charset cs = Charset.forName("UTF-8");
-      byte data [] = Integer.toString(newAttach.clientId).getBytes(cs);
-      newAttach.rwHandler = rwHandler;
-      newAttach.buffer.put(data);
-      newAttach.buffer.flip();
-      Router.addClient(newAttach);
-      client.write(newAttach.buffer, newAttach, rwHandler);
+      Attachment newAttachment = new Attachment();
+      newAttachment.server = attachment.server;
+      newAttachment.client = client;
+      newAttachment.clientId = clientId++;
+      newAttachment.buffer = ByteBuffer.allocate(2048);
+      newAttachment.isRead = false;
+      newAttachment.clientAddr = clientAddr;
+      Charset charset = Charset.forName("UTF-8");
+      byte data [] = Integer.toString(newAttachment.clientId).getBytes(charset);
+      newAttachment.rwHandler = rwHandler;
+      newAttachment.buffer.put(data);
+      newAttachment.buffer.flip();
+      Router.addClient(newAttachment);
+      client.write(newAttachment.buffer, newAttachment, rwHandler);
     } catch (IOException e) {
       e.printStackTrace();
     }
   }
 
   @Override
-  public void failed(Throwable e, Attachment attach) {
+  public void failed(Throwable e, Attachment attachment) {
     System.out.println("Connection Failed.");
     e.printStackTrace();
   }

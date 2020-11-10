@@ -22,9 +22,9 @@ public class StartServer implements Runnable
                 System.out.format("Broker Server: %s%n", sAddr);
             else
                 System.out.format("Market Server: %s%n", sAddr);
-            Attachment attach = new Attachment();
-            attach.server = server;
-            server.accept(attach, new ConnectionHandler());
+            Attachment attachment = new Attachment();
+            attachment.server = server;
+            server.accept(attachment, new ConnectionHandler());
             Thread.currentThread().join();
         } catch(Exception e) {
             System.out.println(e);

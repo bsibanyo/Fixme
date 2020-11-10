@@ -4,38 +4,38 @@ public class ForwardTo implements IResponsibility
 {
     private int DISPATCH = IResponsibility.DISPATCH;
     @Override
-    public void performAction(Attachment attach, int resp)
+    public void performAction(Attachment attachment, int response)
     {
-        if (resp != DISPATCH)
+        if (response != DISPATCH)
         {
-            new EchoBack().performAction(attach, resp);
+            new EchoBack().performAction(attachment, response);
             return ;
         }
-        int id = getDestination(attach.msg);
-        int srcId = getSource(attach.msg);
-        if (srcId != attach.clientId)
+        int id = getDestination(attachment.message);
+        int srcId = getSource(attachment.message);
+        if (srcId != attachment.clientId)
         {
-            System.out.println("src = " + srcId + " clientId = "+ attach.clientId);
-            new EchoBack().performAction(attach, IResponsibility.ECHOBACK);
+            System.out.println("src = " + srcId + " clientId = "+ attachment.clientId);
+            new EchoBack().performAction(attachment, IResponsibility.ECHOBACK);
             return ;
         }  
         try
         {
-            if (attach.client.isOpen() && Router.getSize() > 1)
+            if (attachment.client.isOpen() && Router.getSize() > 1)
             {
-                Attachment att = Router.getClient(id);
-                if (att == null)
+                Attachment _attachment = Router.getClient(id);
+                if (_attachment == null)
                 {
-                    new EchoBack().performAction(attach, IResponsibility.ECHOBACK);
+                    new EchoBack().performAction(attachment, IResponsibility.ECHOBACK);
                     return ;
                 }
-                att.isRead = false;
-                att.client.write(attach.buffer, att, attach.rwHandler);
+                _attachment.isRead = false;
+                _attachment.client.write(attachment.buffer, _attachment, attachment.rwHandler);
             }
         }
         catch(Exception e)
         {
-            new EchoBack().performAction(attach, IResponsibility.ECHOBACK);
+            new EchoBack().performAction(attachment, IResponsibility.ECHOBACK);
         }
     }
     private int getDestination(String datum[])

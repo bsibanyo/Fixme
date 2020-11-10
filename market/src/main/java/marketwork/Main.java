@@ -2,7 +2,6 @@ package main.java.marketwork;
 
 public class Main
 {
-  //args[0] == quantity, args[1] == price
   public static void main(String[] args) {
     if (args.length != 0) {
         Market market = new Market(Integer.parseInt(args[0]), Integer.parseInt(args[1]));

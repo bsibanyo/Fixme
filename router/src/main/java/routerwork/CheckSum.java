@@ -4,34 +4,34 @@ public class CheckSum implements IResponsibility
 {
     private int CHECKSUM = IResponsibility.CHECKSUM;
     @Override
-    public void performAction(Attachment attach, int resp) {
-        if (resp != CHECKSUM) {
-            new ForwardTo().performAction(attach, resp);
+    public void performAction(Attachment attachment, int response) {
+        if (response != CHECKSUM) {
+            new ForwardTo().performAction(attachment, response);
             return ;
         }
 
-        int size = getMsgSize(attach.msg);
-        int checksum = getCheckSum(attach.msg[attach.msg.length - 1]);
+        int size = getMessageSize(attachment.message);
+        int checksum = getCheckSum(attachment.message[attachment.message.length - 1]);
         int action = IResponsibility.ECHOBACK;
         if (size % 256 != checksum)
             action = IResponsibility.ECHOBACK;
         else
             action = IResponsibility.DISPATCH;
-        new ForwardTo().performAction(attach, action);
+        new ForwardTo().performAction(attachment, action);
     }
 
-    private int getMsgSize(String datum[]) {
-        int j = 0;
-		char t[];
+    private int getMessageSize(String datum[]) {
+        int a = 0;
+		char c[];
 
-		for(int k = 0; k < datum.length - 1; k++) {
-			t = datum[k].toCharArray();
-			for(int i = 0; i < t.length; i++) {
-				j += (int)t[i];
+		for(int b = 0; b < datum.length - 1; b++) {
+			c = datum[b].toCharArray();
+			for(int d = 0; d < c.length; d++) {
+				a += (int)c[d];
 			}
-			j += 1;
+			a += 1;
 		}
-        return (j);
+        return (a);
     }
 
     private int getCheckSum(String part) {

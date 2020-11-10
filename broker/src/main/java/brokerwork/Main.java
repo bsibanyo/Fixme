@@ -2,7 +2,6 @@ package main.java.brokerwork;
 
 public class Main {
   public static void main(String[] args) throws Exception {
-    //args[0] == market id && args[1] == 1 == buy || args[1] == 2 == sell
     if (args.length == 2) {
       if (args[1].equals("1") || args[1].equals("2")) {
         Broker broker = new Broker(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
